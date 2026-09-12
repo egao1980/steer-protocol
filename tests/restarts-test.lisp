@@ -48,3 +48,20 @@
                       (use-value d c))))
       (setf got (steer-protocol:load-skill "/no/such/SKILL.md")))
     (ok (eq d got))))
+
+(deftest unknown-version-use-value
+  (let* ((root (uiop:ensure-directory-pathname
+                (merge-pathnames (format nil "steer-ver-~a/" (random 100000))
+                                 (uiop:temporary-directory))))
+         (fallback (steer-protocol:make-steer-skill "x" :body "fb"))
+         (got nil))
+    (unwind-protect
+         (progn
+           (ensure-directories-exist root)
+           (let ((store (steer-protocol:make-file-skill-store root)))
+             (handler-bind ((steer-protocol:steer-unknown-version
+                             (lambda (c)
+                               (use-value fallback c))))
+               (setf got (steer-protocol:load-skill-version store "x" "9"))))
+           (ok (eq fallback got)))
+      (uiop:delete-directory-tree root :validate t :if-does-not-exist :ignore))))

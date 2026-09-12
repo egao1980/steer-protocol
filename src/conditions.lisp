@@ -24,3 +24,19 @@
              (format s "SKILL.md not found: ~s~@[: ~a~]"
                      (steer-skill-not-found-path c)
                      (steer-error-message c)))))
+
+(define-condition steer-skill-store-error (steer-error)
+  ((store :initarg :store :reader steer-skill-store-error-store :initform nil)
+   (name :initarg :name :reader steer-skill-store-error-name :initform nil))
+  (:report (lambda (c s)
+             (format s "skill store error~@[ for ~s~]~@[: ~a~]"
+                     (steer-skill-store-error-name c)
+                     (steer-error-message c)))))
+
+(define-condition steer-unknown-version (steer-skill-store-error)
+  ((version :initarg :version :reader steer-unknown-version-id :initform nil))
+  (:report (lambda (c s)
+             (format s "unknown skill version ~s~@[ for ~s~]~@[: ~a~]"
+                     (steer-unknown-version-id c)
+                     (steer-skill-store-error-name c)
+                     (steer-error-message c)))))
