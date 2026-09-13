@@ -7,6 +7,12 @@
     (ensure-directories-exist root)
     root))
 
+(defun %cleanup-tmpdir (root)
+  ;; Windows git objects are often read-only; failing cleanup is not a
+  ;; product bug. Swallow DELETE-FILE-ERROR so the suite can finish.
+  (ignore-errors
+   (uiop:delete-directory-tree root :validate t :if-does-not-exist :ignore)))
+
 (defun %make-skill (name body &optional description)
   (steer-protocol:make-steer-skill name :body body :description description))
 
@@ -41,7 +47,7 @@
              (ok (search "first body"
                          (uiop:read-file-string
                           (merge-pathnames "review/SKILL.md" root))))))
-      (uiop:delete-directory-tree root :validate t :if-does-not-exist :ignore))))
+      (%cleanup-tmpdir root))))
 
 (deftest file-skill-store-unknown-version
   (let ((root (%tmpdir "steer-file-miss")))
@@ -51,7 +57,7 @@
             store (%make-skill "x" "only"))
            (ok (signals (steer-protocol:load-skill-version store "x" "99")
                         'steer-protocol:steer-unknown-version)))
-      (uiop:delete-directory-tree root :validate t :if-does-not-exist :ignore))))
+      (%cleanup-tmpdir root))))
 
 (defun %init-git-repo (root)
   (uiop:run-program '("git" "init")
@@ -99,5 +105,4 @@
                                 store "review" v1)))
                    (ok (search "git first"
                                (steer-protocol:steer-directive-body rolled))))))
-          (uiop:delete-directory-tree root :validate t
-                                      :if-does-not-exist :ignore)))))
+          (%cleanup-tmpdir root)))))
