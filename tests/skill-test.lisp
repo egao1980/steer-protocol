@@ -1,31 +1,30 @@
 (in-package #:steer-protocol/tests)
 
-;;; Literal LF (not FORMAT). Windows CRLF checkout turns `~\` line
-;;; continuations into `~\r`, which SBCL FORMATTER rejects.
-(defparameter *nl* (string #\Newline))
+;;; Single-line FORMAT control. A trailing `~` line-continuation becomes
+;;; `~\r` under Windows CRLF and SBCL FORMATTER dies at macroexpansion.
 (defparameter *tools-markdown*
-  (uiop:strcat
-   "---" *nl*
-   "name: review" *nl*
-   "description: PRs" *nl*
-   "tools: lookup, grep" *nl*
-   "---" *nl*
-   *nl*
-   "## body" *nl*
-   *nl*
-   "Do the review." *nl*
-   *nl*
-   "## tools" *nl*
-   *nl*
-   "### lookup" *nl*
-   *nl*
-   "description: Look up a symbol" *nl*
-   *nl*
-   "name: lookup" *nl*
-   *nl*
-   "### grep" *nl*
-   *nl*
-   "description: Search the tree" *nl*)))
+  (format nil "~{~A~%~}"
+          '("---"
+            "name: review"
+            "description: PRs"
+            "tools: lookup, grep"
+            "---"
+            ""
+            "## body"
+            ""
+            "Do the review."
+            ""
+            "## tools"
+            ""
+            "### lookup"
+            ""
+            "description: Look up a symbol"
+            ""
+            "name: lookup"
+            ""
+            "### grep"
+            ""
+            "description: Search the tree")))
 
 (deftest parse-skill-tools-section
   (multiple-value-bind (fm body tools)
