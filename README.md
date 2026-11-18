@@ -81,6 +81,7 @@ Modelled on "instructions found as the agent reaches them". An `instruction-disc
 - Directives are `:rule`s named by their root-relative path; `extra` carries `:scope` (directory), `:scope-name` and `:hash`.
 - De-duplication: `list-directives` = what was injected and is still in context. `forget-instructions` (all, or `:path`) resets after a compaction. `instruction-injected-p` asks about one file. `:mark nil` peeks; `mark-instructions-injected` records later.
 - Change detection: `instruction-content-hash` (GF; default FNV-1a 64, not a security hash). A changed file is returned again and replaces the stored version.
+- `coerce-instruction-discovery` takes a discovery, a root path or a plist `(:root dir :include-claude t …)`. `copy-instruction-discovery` gives a fresh copy (same class and config, empty memory unless `:keep-injected`) — one per agent run.
 - Unreadable file → `steer-instruction-unreadable` (`:cause`) with `use-value` (text) / `continue` (skip).
 
 ## Base system prompt (0.3)

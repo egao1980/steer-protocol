@@ -112,6 +112,20 @@
       (ok (equal "version two" (steer-protocol:steer-directive-body
                                 (first (steer-protocol:list-directives disc))))))))
 
+(deftest copy-discovery
+  (with-project (root)
+    (%write-file (merge-pathnames "AGENTS.md" root) "r")
+    (let ((disc (steer-protocol:make-instruction-discovery root :include-claude t)))
+      (steer-protocol:discover-instructions disc "x")
+      (let ((fresh (steer-protocol:copy-instruction-discovery disc))
+            (kept (steer-protocol:copy-instruction-discovery disc :keep-injected t)))
+        (ok (equal (steer-protocol:instruction-discovery-names disc)
+                   (steer-protocol:instruction-discovery-names fresh)))
+        (ok (null (steer-protocol:list-directives fresh)))
+        (ok (= 1 (length (steer-protocol:discover-instructions fresh "x"))))
+        (ok (null (steer-protocol:discover-instructions kept "x")))
+        (ok (= 1 (length (steer-protocol:list-directives disc))))))))
+
 (deftest mark-nil-peeks
   (with-project (root)
     (%write-file (merge-pathnames "AGENTS.md" root) "r")
@@ -134,6 +148,17 @@
       (ok (search "root says hi" text))
       (ok (search "# rule: a/AGENTS.md" (steer-protocol:compile-steering disc)))
       (ok (equal "" (steer-protocol:compile-instructions nil))))))
+
+(deftest coerce-discovery-shapes
+  (with-project (root)
+    (ok (null (steer-protocol:coerce-instruction-discovery nil)))
+    (ok (steer-protocol:instruction-discovery-p
+         (steer-protocol:coerce-instruction-discovery root)))
+    (let ((d (steer-protocol:coerce-instruction-discovery
+              (list :root root :include-claude t))))
+      (ok (member "CLAUDE.md" (steer-protocol:instruction-discovery-names d)
+                  :test #'equal))
+      (ok (eq d (steer-protocol:coerce-instruction-discovery d))))))
 
 (deftest content-hash-stable
   (let ((disc (steer-protocol:make-instruction-discovery (uiop:temporary-directory))))

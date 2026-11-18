@@ -73,6 +73,8 @@
            #:instruction-discovery
            #:instruction-discovery-p
            #:make-instruction-discovery
+           #:coerce-instruction-discovery
+           #:copy-instruction-discovery
            #:instruction-discovery-root
            #:instruction-discovery-names
            #:instruction-discovery-per-directory

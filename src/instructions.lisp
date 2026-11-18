@@ -56,6 +56,33 @@
                    :per-directory per-directory
                    :include-root include-root)))
 
+(defun coerce-instruction-discovery (x)
+  "X as an INSTRUCTION-DISCOVERY: one itself, NIL, a root path designator, or
+   a plist (:root dir . make-instruction-discovery keys)."
+  (etypecase x
+    (null nil)
+    (instruction-discovery x)
+    ((or string pathname) (make-instruction-discovery x))
+    (cons (apply #'make-instruction-discovery (getf x :root)
+                 (loop for (k v) on x by #'cddr
+                       unless (eq k :root) nconc (list k v))))))
+
+(defgeneric copy-instruction-discovery (discovery &key keep-injected)
+  (:documentation "Same class and configuration as DISCOVERY. The copy's
+   injected memory is empty unless KEEP-INJECTED. Use one copy per agent run:
+   what is in context belongs to the run, not the shared configuration.")
+  (:method ((discovery instruction-discovery) &key keep-injected)
+   (let ((new (make-instance (class-of discovery)
+                             :root (instruction-discovery-root discovery)
+                             :names (copy-list (instruction-discovery-names discovery))
+                             :per-directory (instruction-discovery-per-directory discovery)
+                             :include-root (instruction-discovery-include-root-p discovery))))
+     (when keep-injected
+       (maphash (lambda (k v) (setf (gethash k (%injected-table new)) v))
+                (%injected-table discovery))
+       (setf (%injected-order new) (copy-list (%injected-order discovery))))
+     new)))
+
 (defgeneric instruction-candidates (discovery path &key)
   (:documentation "Existing instruction files that apply to PATH, outermost
    (root) first. PATH outside the root → NIL."))
