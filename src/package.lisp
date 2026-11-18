@@ -66,6 +66,40 @@
            #:skill-version-provenance
            #:skill-version-name
 
+           #:steer-instruction-unreadable
+           #:steer-instruction-unreadable-path
+           #:steer-instruction-unreadable-cause
+           #:*default-instruction-names*
+           #:instruction-discovery
+           #:instruction-discovery-p
+           #:make-instruction-discovery
+           #:instruction-discovery-root
+           #:instruction-discovery-names
+           #:instruction-discovery-per-directory
+           #:instruction-discovery-include-root-p
+           #:instruction-candidates
+           #:discover-instructions
+           #:instruction-injected-p
+           #:mark-instructions-injected
+           #:forget-instructions
+           #:instruction-content-hash
+           #:compile-instructions
+
+           #:prompt-variant
+           #:prompt-variant-p
+           #:anthropic-prompt-variant
+           #:openai-prompt-variant
+           #:prompt-variant-name
+           #:prompt-variant-preamble
+           #:prompt-variant-for
+           #:prompt-variant-for-family
+           #:model-family
+           #:*tool-guidance*
+           #:register-tool-guidance
+           #:tool-guidance
+           #:render-system-prompt
+           #:build-system-prompt
+
            #:in-memory-steering
            #:make-in-memory-steering
            #:use-in-memory-steering
