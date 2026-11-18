@@ -40,3 +40,12 @@
                      (steer-unknown-version-id c)
                      (steer-skill-store-error-name c)
                      (steer-error-message c)))))
+
+(define-condition steer-instruction-unreadable (steer-error)
+  ((path :initarg :path :reader steer-instruction-unreadable-path :initform nil)
+   (cause :initarg :cause :reader steer-instruction-unreadable-cause :initform nil))
+  (:report (lambda (c s)
+             (format s "instruction file unreadable: ~s~@[: ~a~]"
+                     (steer-instruction-unreadable-path c)
+                     (or (steer-instruction-unreadable-cause c)
+                         (steer-error-message c))))))

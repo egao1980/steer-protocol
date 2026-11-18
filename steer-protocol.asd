@@ -1,5 +1,5 @@
 (defsystem "steer-protocol"
-  :version "0.2.0"
+  :version "0.3.0"
   :description "CLOS rules/skills steering protocol for cl-stack (not A2A agent-skill)"
   :author "egao1980"
   :license "MIT"
@@ -10,7 +10,9 @@
                (:file "conditions")
                (:file "protocol")
                (:file "skill")
-               (:file "store"))
+               (:file "store")
+               (:file "instructions")
+               (:file "prompt"))
   :in-order-to ((test-op (test-op "steer-protocol/tests"))))
 
 (defsystem "steer-protocol/tests"
@@ -21,7 +23,9 @@
                (:file "protocol-test")
                (:file "restarts-test")
                (:file "skill-test")
-               (:file "store-test"))
+               (:file "store-test")
+               (:file "instructions-test")
+               (:file "prompt-test"))
   :perform (test-op (o c)
              (unless (symbol-call :rove :run c)
                (error "tests failed for ~A" (component-name c)))))
