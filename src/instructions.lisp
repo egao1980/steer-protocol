@@ -182,13 +182,17 @@
       nil)))
 
 (defun %relative-name (discovery file)
-  (let ((rel (uiop:enough-pathname file (instruction-discovery-root discovery))))
-    (uiop:native-namestring rel)))
+  "FILE relative to the root, with / separators on every platform. A
+   directory pathname → \"a/b/\" (root itself → \"\")."
+  (let* ((rel (uiop:enough-pathname file (instruction-discovery-root discovery)))
+         (dirs (rest (pathname-directory rel))))
+    (format nil "~{~a/~}~@[~a~]"
+            (mapcar #'string dirs)
+            (and (pathname-name rel) (file-namestring rel)))))
 
 (defun %instruction-directive (discovery file text hash)
   (let* ((scope (uiop:pathname-directory-pathname file))
-         (rel-scope (uiop:native-namestring
-                     (uiop:enough-pathname scope (instruction-discovery-root discovery))))
+         (rel-scope (%relative-name discovery scope))
          (rel-scope (if (zerop (length rel-scope)) "./" rel-scope)))
     (make-steer-directive
      :kind :rule
