@@ -49,3 +49,16 @@
                      (steer-instruction-unreadable-path c)
                      (or (steer-instruction-unreadable-cause c)
                          (steer-error-message c))))))
+
+(define-condition steer-frontmatter-error (steer-error)
+  ((path :initarg :path :reader steer-frontmatter-error-path :initform nil)
+   (cause :initarg :cause :reader steer-frontmatter-error-cause :initform nil))
+  (:documentation "SKILL.md / rule frontmatter that cannot be used: no closing
+`---` line, YAML that yaml-protocol cannot decode (CAUSE is its condition),
+or a document that is not a mapping. PATH is the file, or NIL for text.")
+  (:report (lambda (c s)
+             (format s "bad frontmatter~@[ in ~a~]~@[: ~a~]"
+                     (let ((p (steer-frontmatter-error-path c)))
+                       (and p (uiop:native-namestring p)))
+                     (or (steer-error-message c)
+                         (steer-frontmatter-error-cause c))))))

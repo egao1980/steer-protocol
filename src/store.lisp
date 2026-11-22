@@ -302,14 +302,10 @@
         (%run-git store (list "show" (format nil "~a:~a" id rel)))
       (declare (ignore err))
       (if (zerop code)
-          (multiple-value-bind (fm body tools)
+          (multiple-value-bind (fm body tools frontmatter-p)
               (parse-skill-markdown out)
-            (make-steer-directive
-             :kind :skill
-             :name (or (getf fm :name) name)
-             :description (getf fm :description)
-             :body body
-             :extra (%extra-with-tools fm tools)))
+            (%directive-from-markdown fm body tools frontmatter-p
+                                      :kind :skill :default-name name))
           (%signal-unknown-version store name version)))))
 
 (defmethod rollback-skill ((store git-skill-store) name version &key)
