@@ -13,6 +13,9 @@
            #:steer-skill-store-error-name
            #:steer-unknown-version
            #:steer-unknown-version-id
+           #:steer-frontmatter-error
+           #:steer-frontmatter-error-path
+           #:steer-frontmatter-error-cause
 
            #:steer-directive
            #:steer-directive-p
@@ -40,6 +43,8 @@
            #:parse-skill-markdown
            #:load-skill
            #:load-skills-from-directory
+           #:skill-frontmatter
+           #:skill-paths
            #:serialize-skill-markdown
            #:skill-tools
            #:skill-tool-fn

@@ -1,0 +1,4 @@
+* text=auto
+*.lisp text eol=lf
+*.asd text eol=lf
+tests/fixtures/** text eol=lf

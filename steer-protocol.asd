@@ -1,9 +1,9 @@
 (defsystem "steer-protocol"
-  :version "0.3.0"
+  :version "0.4.0"
   :description "CLOS rules/skills steering protocol for cl-stack (not A2A agent-skill)"
   :author "egao1980"
   :license "MIT"
-  :depends-on ("llm-protocol")
+  :depends-on ("llm-protocol" (:version "yaml-protocol" "0.2.1"))
   :serial t
   :pathname "src"
   :components ((:file "package")
@@ -23,6 +23,7 @@
                (:file "protocol-test")
                (:file "restarts-test")
                (:file "skill-test")
+               (:file "frontmatter-test")
                (:file "store-test")
                (:file "instructions-test")
                (:file "prompt-test"))

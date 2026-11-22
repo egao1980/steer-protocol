@@ -1,6 +1,6 @@
 # steer-protocol
 
-Lispy **CLOS** rules / skills for [cl-stack](https://github.com/egao1980/cl-stack). One directive type, `:kind` `:rule` or `:skill`. **0.2** adds tool-bearing skills and a versioned skill store. **0.3** adds lazily discovered, path-scoped instructions (`AGENTS.md` found as the agent reaches files) and a small per-model base system prompt builder.
+Lispy **CLOS** rules / skills for [cl-stack](https://github.com/egao1980/cl-stack). One directive type, `:kind` `:rule` or `:skill`. **0.2** adds tool-bearing skills and a versioned skill store. **0.3** adds lazily discovered, path-scoped instructions (`AGENTS.md` found as the agent reaches files) and a small per-model base system prompt builder. **0.4** decodes `SKILL.md` and rule frontmatter with [`yaml-protocol`](https://github.com/egao1980/yaml-protocol) (folded `>-` descriptions, block and flow lists) and adds `skill-frontmatter` and `skill-paths`.
 
 **Not** A2A `agent-skill` (card advertisement). **Not** GFs on `llm-protocol`. **Not** RAG. No `ai-agent-protocol` dependency — tool *descriptors* are `llm-protocol:llm-tool`.
 
@@ -30,7 +30,7 @@ Lispy **CLOS** rules / skills for [cl-stack](https://github.com/egao1980/cl-stac
 
 Wire an agent with `:steering` (`ai-agent-protocol` **0.2.2**). `prepare-agent-turns` applies after memory recall. `make-skill-tool-source` on the agent lists `skill-tools` and dispatches `skill-tool-fn`.
 
-Missing source → `steer-missing-source` (`use-value`). Unknown name → `steer-unknown-directive` (`use-value` / `continue`). Missing file → `steer-skill-not-found` (`use-value`). Unknown store version → `steer-unknown-version` (`use-value` / `continue`).
+Bad frontmatter → `steer-frontmatter-error` (`use-value` on `load-skill`). Missing source → `steer-missing-source` (`use-value`). Unknown name → `steer-unknown-directive` (`use-value` / `continue`). Missing file → `steer-skill-not-found` (`use-value`). Unknown store version → `steer-unknown-version` (`use-value` / `continue`).
 
 ## Tool-bearing skills
 
@@ -54,6 +54,23 @@ description: Search the tree
 ```
 
 `(skill-tools skill)` → list of `llm-protocol:llm-tool` (name, description, parameters string/plist). `(skill-tool-fn skill name)` → function or symbol. Register implementations with `register-skill-tool-fn`, or put a name → fn plist on `steer-directive-extra` as `:tools`.
+
+## Frontmatter (0.4)
+
+The frontmatter is the text between an opening `---` line (the first non-blank line) and the next `---` line. [`yaml-protocol`](https://github.com/egao1980/yaml-protocol) decodes it (YAML 1.2, Core schema), so folded `description: >-` scalars, quoted values, comments and block or flow lists read as YAML says. It must be a mapping (or empty).
+
+```lisp
+(let ((rule (stack-steer:load-skill #p".claude/rules/lisp.md" :kind :rule)))
+  (stack-steer:skill-paths rule)        ; → ("**/*.lisp")
+  (stack-steer:skill-frontmatter rule)) ; → (:description "…" :paths #("**/*.lisp") :globs "**/*.lisp" :alwaysapply nil), T
+```
+
+- `load-skill` → a `steer-directive`: `name` is the frontmatter `name` when it is a string, else the file name; `description` is the frontmatter `description` when it is a string; `body` is the text after the frontmatter (the whole file when there is none), trimmed; `path` is the file.
+- `skill-frontmatter` → `(values plist frontmatter-p)`. Keys are keywords (`_` → `-`, upcased: `allowed_tools` → `:allowed-tools`). Values are what yaml-protocol composes: strings, vectors, `t` / `nil`, numbers, hash-tables. A top-level null is `nil`. `frontmatter-p` is false when the file has no frontmatter block. The keys are also on `steer-directive-extra`, as in 0.3.
+- `skill-paths` → the `paths` globs (Claude Code rules): a YAML list of strings, or one comma-separated string. Absent or empty gives `nil`; anything else signals `steer-frontmatter-error`.
+- `tools:` takes a comma-separated string, a YAML list of names, or a list of `{name, description, parameters}` mappings.
+- No closing `---`, YAML that does not parse (`steer-frontmatter-error-cause` is the yaml-protocol condition), or a document that is not a mapping signals `steer-frontmatter-error` (a `steer-error`, with `steer-frontmatter-error-path`). `load-skill` offers `use-value`.
+- `serialize-skill-markdown` writes the frontmatter with `yaml-protocol:encode`, so it reads back.
 
 ## Versioned skill store
 
